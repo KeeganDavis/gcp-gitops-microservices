@@ -13,8 +13,15 @@ var healthCmd = &cobra.Command{
 	Use:   "health",
 	Short: "Check the health of the Python microservice",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Hardcode the local address for now. In prod, URL is driven by config file or env variable
-		resp, err := http.Get("http://localhost:8000/health")
+		// Default to localhost for local testing, but allow environment variable override for Docker/K8s
+		apiURL := os.Getenv("API_URL")
+		if apiURL == "" {
+			apiURL = "http://localhost:8000"
+		}
+
+		endpoint := fmt.Sprintf("%s/health", apiURL)
+
+		resp, err := http.Get(endpoint)
 		if err != nil {
 			fmt.Printf("Error reaching service: %v\n", err)
 			os.Exit(1)
