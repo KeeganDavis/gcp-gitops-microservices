@@ -1,0 +1,11 @@
+replicaCount: 1
+
+image:
+  repository: python-api
+  tag: v0.1.0
+  pullPolicy: Never # 'Never' is required for our local kind cluster testing
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
