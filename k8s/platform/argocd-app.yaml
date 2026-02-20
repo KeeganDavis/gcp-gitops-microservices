@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-api
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/KeeganDavis/gcp-gitops-microservices.git
+    # Point to active branch
+    targetRevision: feature/local-k8s-manifest
+    path: k8s/apps/python-api/chart
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
