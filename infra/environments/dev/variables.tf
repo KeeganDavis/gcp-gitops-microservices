@@ -14,3 +14,8 @@ variable "zone" {
   type        = string
   default     = "us-central1-a"
 }
+
+variable "github_repository" {
+  type        = string
+  description = "The name of the GitHub repo"
+}
