@@ -20,6 +20,11 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.targetPort }}
+        env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: {{ .Values.env.otelEndpoint }}
+        - name: OTEL_SERVICE_NAME
+          value: {{ .Values.env.otelServiceName }}
         resources:
           requests:
             cpu: "100m"
