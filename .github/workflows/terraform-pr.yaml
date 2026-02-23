@@ -1,0 +1,24 @@
+name: Terraform Security Scan (tfsec)
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+
+jobs:
+  tfsec-scan:
+    name: Run tfsec
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: infrastructure/
+          # Set soft_fail to true for now to review the warnings and not block merges
+          soft_fail: true

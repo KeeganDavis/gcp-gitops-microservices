@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-    # Run only when files in app directory or workflow change
     paths:
       - 'app/**'
       - '.github/workflows/ci.yaml'
@@ -13,20 +12,39 @@ env:
   IMAGE_NAME: python-api
 
 jobs:
-  build-and-push:
+  build-scan-and-push:
     runs-on: ubuntu-latest
+
+    environment: dev
     
     permissions:
       contents: 'read'
       id-token: 'write'
 
-    environment: dev
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set Image Tag
+        run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build Docker Image Locally
+        run: |
+          # Build it locally first so Trivy can scan it before it touches the cloud
+          docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ./app
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
+          format: 'table'
+          exit-code: '1' # Fails the pipeline if vulnerabilities are found
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH' # Only fail the build on high or critical CVEs to prevent alert fatigue
+
       - name: Authenticate to Google Cloud
+        # Only authenticate if the Trivy scan passed
         id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -36,20 +54,15 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker Auth for Artifact Registry
+      - name: Configure Docker Auth & Push to Artifact Registry
         run: |
-          # Extract just the domain (ex. {region}-docker.pkg.dev) from the repo URL
-          AR_HOSTNAME=$(echo "${{ secrets.AR_REPO }}" | cut -d'/' -f1)
-          gcloud auth configure-docker $AR_HOSTNAME --quiet
-
-      - name: Build and Push Docker Image
-        run: |
-          # Generate a tag using the short SHA of the Git commit
-          IMAGE_TAG=$(git rev-parse --short HEAD)
-          FULL_IMAGE_PATH="${{ secrets.AR_REPO }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
-
-          echo "Building image: $FULL_IMAGE_PATH"
+          GAR_HOSTNAME=$(echo "${{ secrets.AR_REPO }}" | cut -d'/' -f1)
+          gcloud auth configure-docker $GAR_HOSTNAME --quiet
           
-          docker build -t $FULL_IMAGE_PATH ./app
+          FULL_IMAGE_PATH="${{ secrets.AR_REPO }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
           
+          # Tag the locally scanned image with the full GAR URL
+          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} $FULL_IMAGE_PATH
+          
+          echo "Pushing verified image: $FULL_IMAGE_PATH"
           docker push $FULL_IMAGE_PATH
