@@ -18,7 +18,7 @@ jobs:
     environment: dev
     
     permissions:
-      contents: 'read'
+      contents: 'write'
       id-token: 'write'
 
     steps:
@@ -66,3 +66,21 @@ jobs:
           
           echo "Pushing verified image: $FULL_IMAGE_PATH"
           docker push $FULL_IMAGE_PATH
+
+      - name: Update Helm Chart Values and Push to Git
+        run: |
+          echo "Updating Helm values.yaml with new image tag: ${{ env.IMAGE_TAG }}"
+          
+          # Use sed to replace the existing tag with the newly built Git SHA
+          sed -i "s/tag: .*/tag: ${{ env.IMAGE_TAG }}/" k8s/apps/python-api/chart/values.yaml
+          
+          # Configure standard GitHub Actions bot identity
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Commit the change
+          git add k8s/apps/python-api/chart/values.yaml
+          git commit -m "cd: automatically update python-api image tag to ${{ env.IMAGE_TAG }}"
+          
+          # Push back to the main branch
+          git push origin main
