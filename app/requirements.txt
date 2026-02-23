@@ -9,6 +9,7 @@ h11==0.16.0
 idna==3.11
 importlib_metadata==8.7.1
 opentelemetry-api==1.39.1
+opentelemetry-exporter-otlp
 opentelemetry-instrumentation==0.60b1
 opentelemetry-instrumentation-asgi==0.60b1
 opentelemetry-instrumentation-fastapi==0.60b1

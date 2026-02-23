@@ -7,11 +7,42 @@ services:
       - "8000:8000"
     networks:
       - gitops-net
+    environment:
+      # Tell Python OTel SDK to send data to local collector
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_SERVICE_NAME=python-api
+      - OTEL_TRACES_EXPORTER=otlp
+    depends_on:
+      - otel-collector
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 5s
       retries: 3
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./app/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+    networks:
+      - gitops-net
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      # Enable Jaeger to receive standard OTLP data directly
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # Jaeger Web UI
+      - "4317"        # OTLP gRPC port
+    networks:
+      - gitops-net
 
   go-cli:
     build:
