@@ -52,3 +52,19 @@ output "github_actions_provider_name" {
 output "github_actions_service_account" {
   value = module.wif.service_account_email
 }
+
+module "gar" {
+  source = "../../modules/gar"
+
+  project_id    = var.project_id
+  region        = var.region
+  repository_id = "capstone-docker-repo"
+
+  depends_on = [
+    google_project_service.enabled_apis
+  ]
+}
+
+output "artifact_registry_url" {
+  value = module.gar.repository_url
+}
