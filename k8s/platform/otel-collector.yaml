@@ -60,7 +60,7 @@ spec:
         # 'contrib' image contains the googlecloud exporter
         - name: otel-collector
           image: otel/opentelemetry-collector-contrib:latest
-          command: ["--config=/conf/relay.yaml"]
+          args: ["--config=/conf/relay.yaml"]
           ports:
             - containerPort: 4317
             - containerPort: 4318
