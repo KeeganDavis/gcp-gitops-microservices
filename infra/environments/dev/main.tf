@@ -38,3 +38,29 @@ module "gke" {
     module.vpc
   ]
 }
+
+# OTel collector service account
+resource "google_service_account" "otel_sa" {
+  account_id   = "otel-collector-sa"
+  display_name = "OpenTelemetry Collector Service Account"
+}
+
+# Grant OTel collector SA permission to write to Google Cloud Trace
+resource "google_project_iam_member" "otel_trace_agent" {
+  project = var.project_id
+  role    = "roles/cloudtrace.agent"
+  member  = "serviceAccount:${google_service_account.otel_sa.email}"
+}
+
+# Bind the SA to the Kubernetes Service Account via Workload Identity
+# member format: serviceAccount:PROJECT_ID.svc.id.goog[K8S_NAMESPACE/K8S_SERVICE_ACCOUNT]
+resource "google_service_account_iam_member" "otel_workload_identity_binding" {
+  service_account_id = google_service_account.otel_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[monitoring/otel-collector-ksa]"
+}
+
+# Output email for use in K8s manifests
+output "otel_service_account_email" {
+  value = google_service_account.otel_sa.email
+}
