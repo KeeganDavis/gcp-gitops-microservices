@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: us-central1-docker.pkg.dev/gcp-gitops-microservices/capstone-docker-repo/python-api
-  tag: d6d93ea
+  tag: 61a70b6
   pullPolicy: IfNotPresent
 
 service:
