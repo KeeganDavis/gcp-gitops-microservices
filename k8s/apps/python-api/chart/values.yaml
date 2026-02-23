@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: python-api
-  tag: v0.1.0
-  pullPolicy: Never # 'Never' is required for our local kind cluster testing
+  repository: us-central1-docker.pkg.dev/gcp-gitops-microservices/capstone-docker-repo/python-api
+  tag: d6d93ea
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
