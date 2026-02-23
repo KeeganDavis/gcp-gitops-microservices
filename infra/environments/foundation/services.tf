@@ -2,8 +2,9 @@ variable "gcp_service_list" {
   description = "The list of apis necessary for the project"
   type        = list(string)
   default = [
-    "compute.googleapis.com",              # Required for VPC and Compute
-    "container.googleapis.com",            # Required for GKE
+    "artifactregistry.googleapis.com",     # Required for Docker Images
+    "iamcredentials.googleapis.com",       # Required for Workload Identity Federation
+    "sts.googleapis.com"                   # Required for Security Token Service (WIF)
   ]
 }
 
