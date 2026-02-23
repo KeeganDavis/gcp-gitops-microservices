@@ -32,39 +32,3 @@ module "gke" {
     module.vpc
   ]
 }
-
-module "wif" {
-  source = "../../modules/wif"
-
-  project_id        = var.project_id
-  github_repository = var.github_repository
-
-  depends_on = [
-    google_project_service.enabled_apis
-  ]
-}
-
-# Output the WIF details for use in CI/CD pipeline
-output "github_actions_provider_name" {
-  value = module.wif.provider_name
-}
-
-output "github_actions_service_account" {
-  value = module.wif.service_account_email
-}
-
-module "gar" {
-  source = "../../modules/gar"
-
-  project_id    = var.project_id
-  region        = var.region
-  repository_id = "capstone-docker-repo"
-
-  depends_on = [
-    google_project_service.enabled_apis
-  ]
-}
-
-output "artifact_registry_url" {
-  value = module.gar.repository_url
-}
