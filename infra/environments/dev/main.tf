@@ -31,7 +31,7 @@ module "gke" {
   subnet_name  = module.vpc.subnet_name
 
   # Added to trigger tfsec pipeline
-  # environment = "dev"
+  # environment = "dev" 
 
   # Wait for the VPC to be fully built before trying to put a cluster inside it
   depends_on = [
