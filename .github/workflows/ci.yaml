@@ -1,0 +1,55 @@
+name: Build and Push Python API
+
+on:
+  push:
+    branches:
+      - main
+    # Run only when files in app directory or workflow change
+    paths:
+      - 'app/**'
+      - '.github/workflows/ci.yaml'
+
+env:
+  IMAGE_NAME: python-api
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    environment: dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker Auth for Artifact Registry
+        run: |
+          # Extract just the domain (ex. {region}-docker.pkg.dev) from the repo URL
+          AR_HOSTNAME=$(echo "${{ secrets.AR_REPO }}" | cut -d'/' -f1)
+          gcloud auth configure-docker $AR_HOSTNAME --quiet
+
+      - name: Build and Push Docker Image
+        run: |
+          # Generate a tag using the short SHA of the Git commit
+          IMAGE_TAG=$(git rev-parse --short HEAD)
+          FULL_IMAGE_PATH="${{ secrets.AR_REPO }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
+
+          echo "Building image: $FULL_IMAGE_PATH"
+          
+          docker build -t $FULL_IMAGE_PATH ./app
+          
+          docker push $FULL_IMAGE_PATH
