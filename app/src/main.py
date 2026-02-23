@@ -24,7 +24,7 @@ async def root():
 @app.get("/health")
 async def health_check():
     # Kubernetes pings this endpoint to make sure the pod is alive
-    return {"status": "healthy"}
+    return {"status": "healthy", "version": "automated-gitops-v1"}
 
 @app.get("/cpu-stress")
 async def cpu_stress():

@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/KeeganDavis/gcp-gitops-microservices.git
     # Point to active branch
-    targetRevision: feature/gke-gitops
+    targetRevision: main
     path: k8s/apps/python-api/chart
   destination:
     server: https://kubernetes.default.svc
