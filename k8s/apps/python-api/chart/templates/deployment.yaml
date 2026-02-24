@@ -34,12 +34,7 @@ spec:
         - name: OTEL_PYTHON_EXCLUDED_URLS
           value: {{ .Values.env.OTEL_PYTHON_EXCLUDED_URLS }}
         resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "500m"
-            memory: "256Mi"
+          {{- toYaml .Values.resources | nindent 10 }}
         livenessProbe:
           httpGet:
             path: /health
