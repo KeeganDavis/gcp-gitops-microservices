@@ -20,6 +20,12 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.targetPort }}
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 10
         env:
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: {{ .Values.env.otelEndpoint }}
