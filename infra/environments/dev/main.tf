@@ -64,3 +64,22 @@ resource "google_service_account_iam_member" "otel_workload_identity_binding" {
 output "otel_service_account_email" {
   value = google_service_account.otel_sa.email
 }
+
+# Reserve a static global IP address for the Python API Ingress
+resource "google_compute_global_address" "python_api_ip" {
+  name         = "python-api-global-ip"
+  description  = "Static IP for the Capstone Python API"
+  address_type = "EXTERNAL"
+}
+
+# Output the raw IP address
+output "python_api_public_ip" {
+  value       = google_compute_global_address.python_api_ip.address
+  description = "The public IP address of the Python API"
+}
+
+# Output the name to use for the Ingress annotation in Helm template
+output "python_api_ip_name" {
+  value       = google_compute_global_address.python_api_ip.name
+  description = "The name of the static IP resource"
+}
