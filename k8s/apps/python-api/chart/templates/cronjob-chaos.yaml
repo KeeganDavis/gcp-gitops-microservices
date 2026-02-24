@@ -1,0 +1,32 @@
+{{- if .Values.chaos.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: chaos-monkey
+spec:
+  # Run every minute
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          # Attach the RBAC permissions we just created
+          serviceAccountName: chaos-monkey-sa
+          containers:
+            - name: kubectl
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  # Find a python-api pod and delete it
+                  POD=$(kubectl get pods -l app=python-api -o jsonpath="{.items[0].metadata.name}")
+                  if [ -n "$POD" ]; then
+                    echo "Chaos Monkey executing: Deleting pod $POD"
+                    kubectl delete pod $POD
+                  else
+                    echo "No pods found to delete."
+                  fi
+          restartPolicy: OnFailure
+{{- end }}
