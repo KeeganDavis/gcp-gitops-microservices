@@ -5,7 +5,10 @@ metadata:
   labels:
     app: python-api
 spec:
+  # Only render this line if HPA is disabled
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app: python-api
