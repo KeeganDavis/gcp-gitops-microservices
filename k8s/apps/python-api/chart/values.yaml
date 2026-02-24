@@ -13,3 +13,4 @@ service:
 env:
   otelEndpoint: "http://otel-collector.monitoring.svc.cluster.local:4317"
   otelServiceName: "python-api-gke"
+  OTEL_PYTHON_EXCLUDED_URLS: "health"

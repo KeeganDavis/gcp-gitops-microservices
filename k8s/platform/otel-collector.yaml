@@ -24,7 +24,9 @@ data:
       otlp:
         protocols:
           grpc:
+            endpoint: 0.0.0.0:4317
           http:
+            endpoint: 0.0.0.0:4318
     processors:
       batch:
     exporters:
@@ -60,6 +62,7 @@ spec:
         # 'contrib' image contains the googlecloud exporter
         - name: otel-collector
           image: otel/opentelemetry-collector-contrib:latest
+          command: ["/otelcol-contrib"]
           args: ["--config=/conf/relay.yaml"]
           ports:
             - containerPort: 4317

@@ -25,6 +25,8 @@ spec:
           value: {{ .Values.env.otelEndpoint }}
         - name: OTEL_SERVICE_NAME
           value: {{ .Values.env.otelServiceName }}
+        - name: OTEL_PYTHON_EXCLUDED_URLS
+          value: {{ .Values.env.OTEL_PYTHON_EXCLUDED_URLS }}
         resources:
           requests:
             cpu: "100m"
