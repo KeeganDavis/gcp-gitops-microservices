@@ -2,9 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "python-api.fullname" . }}
-  labels:
-    {{- include "python-api.labels" . | nindent 4 }}
+  name: python-api-ingress
   annotations:
     # Tells GKE to provision an External HTTP(S) Load Balancer
     kubernetes.io/ingress.class: "gce"
@@ -18,7 +16,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "python-api.fullname" . }}
+                name: python-api-python-api-service
                 port:
                   number: {{ .Values.service.port }}
 {{- end }}
